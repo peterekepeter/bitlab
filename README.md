@@ -1,4 +1,5 @@
 # bitlab 
+
 Various experiments with bit based operations. 
 Contains some third party code to test my methods against other methods. 
 Educational use only.
@@ -111,10 +112,47 @@ The requirement are to have a computer with random access memory and basic bit-w
 
 ## experimental results
 
+The transition count problem has been implemented in multiple ways to test the performance of various methods.
+The input is a randomly generates sequence of 1600000000 bits, that is 200 megabytes of random data.
+The test was run on a 1.3Ghz Intel Celeron processor.
+The following are the running time of the tests:
 
+0: Naive implementation:            2985 ms
+1: Look up and carry:                 62 ms
+2: Look up and carry, unrolled:       63 ms
+3: NIST implementation:             1984 ms
+4: NIST implementation, optimised:  1812 ms
+5: optimised NIST 1:                1406 ms
+6: optimised NIST 2:                 125 ms
+7: optimised NIST 3:                 109 ms
+
+Test 0 is the naive implementation. 
+The naive implementation operates on a bit by bit level by shifting bits of a word, and testing the previous bit against the next one.
+This implementation takes up the most time, but it is not useless. 
+It was used to generate the look up tables for look up and carry and to validate the results of the look up and carry methods.
+
+Test 1 is the basic implementation of look up and carry.
+It works on 16-bit words on each step and 1 bit is carried over between each step. 
+It is 48 times faster than a naive implementation.
+
+Test 2 is a different implementation of look up and carry which unrolls the loop to process 128 bits during each step. 
+In some cases it offers a better run time, but the code is much harder to maintain than the basic look up and carry implementation.
+
+Test 3 is the official NIST implementation. 
+Here each bit is represented in a byte, wasting 7 bits of memory for every 1 bit from the sequence.
+While loading a byte instead is easier than shifting and testing a word, it has a better performance than the naive implementation.
+However it should be noted that 5968 ms were taken to allocate extra memory for this method to work.
+
+Test 4 is similar to the test 3, it is the same NIST implementation but with some optimization.
 
 
 ## future work
 
+Currently to make use of the look up and carry method a programmer who has experience with optimization is required. 
+The programmer needs to make a good decision on the size of the look up table, and to follow the implementation guidelines presented in this paper.
+These steps should be automated. 
+Given a 'higher level' description of the function, an automated system can be create which will generate the look up table. 
+This will speed up the development and testing of such algorithms and can also eliminate potential implementation bugs.
+
 This look up and carry method defines a computational model. 
-If there is a representation of a function, it is possible to compile the function into look up table and apply it using the look up and carry method.
+As for any computation model, a compiler can be created which translates a high level description into a look up table.
