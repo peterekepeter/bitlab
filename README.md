@@ -23,7 +23,7 @@ In this project, look up tables are used to efficiently process bit sequences.
 A look up table is treated as a function which maps short sequences of bits to another short sequence of bits.
 It is used to efficiently implement some functions inside a program.
 The efficiency is achieved by replacing multiple instructions with a single memory lookup.
-Unfortunately it can not be generalised for everything, but it is widely used for optimising at least a part of a function.
+Unfortunately it can not be generalized for everything, but it is widely used for optimising at least a part of a function.
 For example the x86 CISC instruction `fsin` uses a look up table inside the CPU to compute the sine of a floating point value. [should reference]
 
 The look up table is located in the computer memory. 
@@ -37,15 +37,33 @@ But that would require 4GB of RAM, wasting the whole address space on a single l
 A classic input size is 8-bit, using only 256 bytes of RAM for the lookup table.
 A reasonable input size is 16-bit, which uses 64KB of RAM, which has no impact on modern applications.
 However there is no need to align the input to these classical values. 
-By using a bitmask, any input from 18-bit downto 1-bit can be used.
+By using a bit-mask, any input from 18-bit down to 1-bit can be used.
 In practice 17-bit input works well with no performance overhead compared to 16-bit. [Experimental results]
 
-The nubmer of output bits is limited by the values that can be adressed.
+The number of output bits is limited by the values that can be addressed.
 If the CPU can only load and store 32-bit values from memory, then we're limited to multiples of 32-bits. 
 It is up to the programmer how he wishes to use these values.
 If the programmer only decides to use 19 bits out of 32 bits, that is a bit wasteful.
 The x86 family of processors has the advantage of being able to load and store 32-bit, 16-bit or 8-bit values.
+If the number of output bits is greater than the largest value that can be loaded, the input can be shifted left by one bit. 
+Shifting the input one bit to the left causes the least significant bit to be 0, effectively skipping every second value in memory.
+The skipped value can be loaded together with the addressed value to produce a value twice as big as the largest loadable value.
 
+Another important aspect of the look up table is that the values must be computed in the memory region occupied by it.
+Depending on the application and the size of the look up table, the time of computation can be long. 
+If the programmer wants to store the results of a very expensive recursive search inside a look up table then the time to compute it might take a lot.
+The computation time might also be a limiting factor in the chosen size of a look up table.
+In these extreme cases, the look up table should be stored on a persistent medium, and only recompute it if necessary.
+
+Some situations require huge look up tables with sizes up to a gigabyte, this is perfectly acceptable.
+If the memory reads have a uniform distribution, then most of the reads from the look up tables will result in cache miss.
+Depending on what is stored inside the look up table, the performance might be worse than bypassing the look up table and computing the outputs directly.
+
+It should be clear by now the advantages that look up tables can bring to application development. 
+However it should also be clear that this method cannot be applied in every case.
+For the maximum efficiency the programmer must choose appropriate sizes for both the input and output.
+The size occupied in memory affects both performance and memory efficiency.
+For optimal performance the look up table must fit inside the cache memory next to the program code and possibly other data.
 
 
 
